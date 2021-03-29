@@ -1,11 +1,11 @@
-import MongoClient from "mongodb/lib/mongo_client";
-
+import { MongoClient } from "mongodb";
 
 class MongoSingleton {
     public static _instance : MongoSingleton;
 
     public connectionString = "mongodb+srv://dbuser:dbuser@cluster0.pwegt.mongodb.net/AdminBddProject?retryWrites=true&w=majority" 
     public client = new MongoClient(this.connectionString)
+    public db = this.client.db("AdminBddProject");
 
     private constructor() { }
 
@@ -16,16 +16,18 @@ class MongoSingleton {
         return this._instance;
     }
 
-    insert(collectionName: string, data: object) {
-
+    async insert(collectionName: string, data: object) {
+        return this.db.collection(collectionName).insertOne(data);
     }
 
-    get(collectionName: string, filter: object) {
-
+    async get(collectionName: string, filter: object): Promise<object> {
+        return this.db.collection(collectionName).findOne(filter)
     }
 
-    update(collectionName: string, filter: object, data: object) {
-
+    async update(collectionName: string, filter: object, data: object) {
+        return this.db.collection(collectionName).updateOne(filter, data);
     }
     
 }
+
+export default MongoSingleton.getInstance();

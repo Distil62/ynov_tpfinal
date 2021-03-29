@@ -1,5 +1,5 @@
-import { KafkaClient, Producer, ProduceRequest } from 'kafka-node';
-import { KafkaProducers } from './types/Kafka'
+import { Consumer, KafkaClient, Message, Producer, ProduceRequest } from 'kafka-node';
+import { KafkaProducers, KafkaConsummers } from './types/Kafka'
 
 class KafkaSingleton {
     public static _instance : KafkaSingleton;
@@ -9,6 +9,7 @@ class KafkaSingleton {
         kafkaHost: this.boostrapUrl
     });
     public producers: KafkaProducers = {}
+    public consummers: KafkaConsummers = {}
 
     private constructor() { }
 
@@ -19,13 +20,24 @@ class KafkaSingleton {
         return this._instance;
     }
 
-    public listen() {
+    public listen(topic: string, callback: (message: Message) => void) {
+        if (!Object.keys(this.consummers).includes(topic)) {
+            this.consummers[topic] = new Consumer(this.client, [
+                {
+                    topic, partition: 0
+                }
+            ],
+            {
+                autoCommit: false
+            });
+        }
 
+        this.consummers[topic].addListener("message", callback);
     }
 
     public publish(topic: string, data: object) {
         return new Promise((resolve, reject) => {
-            if (Object.keys(this.producers)) {
+            if (!Object.keys(this.producers).includes(topic)) {
                 this.producers[topic] = new Producer(this.client);
             }
     
@@ -43,3 +55,5 @@ class KafkaSingleton {
         
     }
 }
+
+export default KafkaSingleton.getInstance();
