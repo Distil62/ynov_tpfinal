@@ -14,7 +14,10 @@ class KafkaSingleton:
         return KafkaSingleton.__instance
 
     def __init__(self):
-        if KafkaSingleton.__instance != None:
+      if KafkaSingleton.__instance != None:
+         raise Exception("This class is a singleton!")
+      else:
+         KafkaSingleton.__instance = self
 
     def listen(self, topic) -> KafkaConsumer:
         if topic not in self.topics_consume.keys:
