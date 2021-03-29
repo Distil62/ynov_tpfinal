@@ -1,10 +1,9 @@
 const express = require('express')
-const bodyParser= require('body-parser')
 const app = express()
 
 const MongoClient = require('mongodb').MongoClient;
 
-const uri = "mongodb+srv://dbuser:dbuser@cluster0.pwegt.mongodb.net/AdminBddProject?retryWrites=true&w=majority";
+const uri = "";
 
 MongoClient.connect(uri, { useUnifiedTopology: true })
   .then(client => {

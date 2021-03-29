@@ -9,9 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.7"
+    "express": "^4.17.1",
+    "kafka-node": "^5.0.0",
+    "mongodb": "^3.6.5"
   }
 }
