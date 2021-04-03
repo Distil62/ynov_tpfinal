@@ -22,6 +22,7 @@ class KafkaSingleton:
     def listen(self, topic) -> KafkaConsumer:
         if topic not in self.topics_consume.keys:
             self.topics_consume[topic] = KafkaConsumer(topic)
+
         return self.topics_consume[topic]
 
 

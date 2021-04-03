@@ -1,0 +1,5 @@
+L'utilisateur envoi la vidéo 
+On la reçoit complète dans l'API
+On l'envois bout par bout dans kafka
+
+https://gitlab.com/dimimpov/streaming-video-apache-kafka/-/tree/master/kafka
