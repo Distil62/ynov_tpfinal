@@ -29,6 +29,10 @@ export default class VideoController {
                     parition: options.tempName
                 });
 
+                // Créer l'entrée dans Mongo
+
+                // Supprimer le fichier temporaire dans l'API.
+
                 resolve(true);
             });
 
