@@ -48,8 +48,8 @@ class KafkaSingleton {
             const message: ProduceRequest = {
                 messages: JSON.stringify(options.data),
                 topic: options.topic,
-                partition: options.partition,
-                key: options.key
+                key: options.key,
+                partition: options.partition
             };
 
             this.producers[options.topic].send([message], (error, data) => {

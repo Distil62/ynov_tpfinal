@@ -1,7 +1,8 @@
 import { readFile, unlinkSync } from 'fs';
-import { VideoUploadOption } from '../types/Video';
+import { VideoBase, VideoBaseInsertResult, VideoUploadOption } from '../types/Video';
 import KafkaSingleton from './KafkaSingleton';
-import { VIDEO_TOPIC_NAME } from '../constantes';
+import MongoSingleton from './MongoSingleton';
+import { VIDEO_TOPIC_NAME, MONGO_COLLECTION_VIDEO } from '../constantes';
 
 export default class VideoController {
     async fetchAll() {
@@ -15,36 +16,46 @@ export default class VideoController {
     upload(options: VideoUploadOption) {
         return new Promise(async (resolve, reject) => {
             readFile(options.filePath, async (err, data) => {
-                if (err) {
-                    return reject(err);
+                try {
+                    if (err) {
+                        return reject(err);
+                    }
+
+                    //@ts-ignore
+                    if (true == false) {
+                        const fileContent = data;
+                        const mimeType = options.originalName.split(".")[1];
+    
+                        let index = 0;
+                        for (let i = 0, j = data.length; i < j; i += KafkaSingleton.chunkSize) {
+                            const dataPart = fileContent.slice(i, i + KafkaSingleton.chunkSize);
+                            await KafkaSingleton.publish({
+                                data: dataPart,
+                                topic: VIDEO_TOPIC_NAME,
+                                partition: index % 2 == 0 ? 0 : 1,
+                                key: options.tempName + "." + mimeType
+                            });
+                            index++;
+                        }
+                    }
+                    
+
+                    const dataToInsert: VideoBase = {
+                        name: options.originalName,
+                        owner: options.owner,
+                        views: 0
+                    }
+                    // Créer l'entrée dans Mongo
+                    const rrr = await MongoSingleton.insert<VideoBaseInsertResult>(MONGO_COLLECTION_VIDEO, dataToInsert);
+
+                    console.log('rrr ==>', rrr);
+
+                    unlinkSync(options.filePath);
+                    return resolve(true);
+                } catch (e) {
+                    console.log('e ==>', e);
+                    return reject(e);
                 }
-
-                const fileContent = data;
-
-                // couper le contenu en plusieurs petit morceaux. Défini la taille d'un chunck.
-                // CF : https://gitlab.com/dimimpov/streaming-video-apache-kafka/-/blob/master/kafka/producer.js
-                // ligne 30
-
-                const mimeType = options.originalName.split(".")[1];
-
-                let index = 0;
-                for (let i = 0, j = data.length; i < j; i += KafkaSingleton.chunkSize) {
-                    const dataPart = fileContent.slice(i, i + KafkaSingleton.chunkSize);
-                    await KafkaSingleton.publish({
-                        data: dataPart,
-                        topic: VIDEO_TOPIC_NAME,
-                        partition: index,
-                        key: options.tempName + "." + mimeType
-                    });
-                    index++;
-                }
-
-                // Créer l'entrée dans Mongo
-
-                // Supprimer le fichier temporaire dans l'API.
-
-                unlinkSync(options.filePath);
-                return resolve(true);
             });
 
         });

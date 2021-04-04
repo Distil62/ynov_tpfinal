@@ -22,6 +22,7 @@ export default function videoRouter() {
                 filePath: request.file.path,
                 originalName: request.file.originalname,
                 tempName: request.file.filename,
+                owner: "Jean-coucou"
             });
 
             console.log(request.file.originalname + " send !");

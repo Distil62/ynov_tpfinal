@@ -1,7 +1,11 @@
 import express, { json, Response} from 'express';
 import router from './router';
 
-function main() {
+import MongoSingleton from './src/MongoSingleton';
+
+async function main() {
+
+    await MongoSingleton.connectMongo();
     const port = 3000;
     const app = express();
 

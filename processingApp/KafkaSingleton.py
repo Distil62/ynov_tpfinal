@@ -19,7 +19,7 @@ class KafkaSingleton(metaclass=Singleton):
 
     def listen(self, topic: str) -> KafkaConsumer:
         if topic not in self.topics_consume.keys():
-            self.topics_consume[topic] = KafkaConsumer(topic)
+            self.topics_consume[topic] = KafkaConsumer(topic, group_id="video_grp")
 
         return self.topics_consume[topic]
 
