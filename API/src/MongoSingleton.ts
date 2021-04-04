@@ -2,33 +2,18 @@ import { Db, FilterQuery, InsertOneWriteOpResult, MongoClient, UpdateQuery } fro
 import { MONGO_DB, MONGO_URI } from '../constantes'
 
 class MongoSingleton {
-    public static _instance: MongoSingleton;
+    public static _instance : MongoSingleton;
 
-    public connectionString = MONGO_URI;
-    public client = new MongoClient(this.connectionString, { useUnifiedTopology: true })
+    public connectionString = MONGO_URI; 
+    public client = new MongoClient(this.connectionString, {useNewUrlParser: true, useUnifiedTopology: true})
     //@ts-ignore
     public db: Db;
 
     private constructor() { }
 
-    public connectMongo() {
-        return new Promise((resolve, reject) => {
-            console.log("## A ##");
-            MongoClient.connect(this.connectionString, { useUnifiedTopology: true, useNewUrlParser: true }, (err, cli) => {
-                if (err) {
-                    console.error("MONGO CONNECT ERR");
-                    console.error(err);
-                    return reject(err);
-                }
-                console.log("## B ##");
-
-                this.client = cli;
-                this.db = this.client.db(MONGO_DB);
-                console.log("## C ##");
-                resolve(true);
-
-            });
-        });
+    public async connectMongo() {
+        this.client = await this.client.connect();
+        this.db = this.client.db(MONGO_DB);
     }
 
     public static getInstance() {
@@ -50,9 +35,9 @@ class MongoSingleton {
 
     async update<T>(collectionName: string, filter: FilterQuery<T>, data: UpdateQuery<T>) {
         if (!this.db) await this.connectMongo();
-        return this.db.collection(collectionName).updateOne(filter, data, { upsert: true });
+        return this.db.collection(collectionName).updateOne(filter, data, {upsert: true});
     }
-
+    
 }
 
 export default MongoSingleton.getInstance();

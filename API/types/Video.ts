@@ -2,6 +2,7 @@ export interface VideoBase {
     name: string;
     views: number;
     owner: string;
+    hdfs_id: string;
 }
 
 export interface VideoBaseInsertResult extends VideoBase {

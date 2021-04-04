@@ -21,34 +21,32 @@ export default class VideoController {
                         return reject(err);
                     }
 
-                    //@ts-ignore
-                    if (true == false) {
-                        const fileContent = data;
-                        const mimeType = options.originalName.split(".")[1];
-    
-                        let index = 0;
-                        for (let i = 0, j = data.length; i < j; i += KafkaSingleton.chunkSize) {
-                            const dataPart = fileContent.slice(i, i + KafkaSingleton.chunkSize);
-                            await KafkaSingleton.publish({
-                                data: dataPart,
-                                topic: VIDEO_TOPIC_NAME,
-                                partition: index % 2 == 0 ? 0 : 1,
-                                key: options.tempName + "." + mimeType
-                            });
-                            index++;
-                        }
+                    const fileContent = data;
+                    const mimeType = options.originalName.split(".")[1];
+
+                    // Envoyer les données dans KAFKA
+                    let index = 0;
+                    for (let i = 0, j = data.length; i < j; i += KafkaSingleton.chunkSize) {
+                        const dataPart = fileContent.slice(i, i + KafkaSingleton.chunkSize);
+                        await KafkaSingleton.publish({
+                            data: dataPart,
+                            topic: VIDEO_TOPIC_NAME,
+                            partition: index % 2 == 0 ? 0 : 1,
+                            key: options.tempName + "." + mimeType
+                        });
+                        index++;
                     }
-                    
+
 
                     const dataToInsert: VideoBase = {
                         name: options.originalName,
                         owner: options.owner,
-                        views: 0
+                        views: 0,
+                        hdfs_id: options.tempName
                     }
-                    // Créer l'entrée dans Mongo
-                    const rrr = await MongoSingleton.insert<VideoBaseInsertResult>(MONGO_COLLECTION_VIDEO, dataToInsert);
 
-                    console.log('rrr ==>', rrr);
+                    // Créer l'entrée dans Mongo
+                    await MongoSingleton.insert<VideoBaseInsertResult>(MONGO_COLLECTION_VIDEO, dataToInsert);
 
                     unlinkSync(options.filePath);
                     return resolve(true);
