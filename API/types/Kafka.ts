@@ -18,5 +18,5 @@ export interface KafkaPublishOption {
     data: any;
     groupId?: string;
     partition?: number;
-    key: string;
+    key?: string;
 }

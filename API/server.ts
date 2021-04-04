@@ -12,6 +12,10 @@ async function main() {
         response.sendFile(__dirname + '/index.html')
     });
 
+    app.get('/play', (_, response: Response) => {
+        response.sendFile(__dirname + '/play.html')
+    });
+
     app.listen(port, () => {
         console.log("The server is listen on http://localhost:" + port);
     });

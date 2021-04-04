@@ -3,14 +3,16 @@ import { VideoBase, VideoBaseInsertResult, VideoUploadOption } from '../types/Vi
 import KafkaSingleton from './KafkaSingleton';
 import MongoSingleton from './MongoSingleton';
 import { VIDEO_TOPIC_NAME, MONGO_COLLECTION_VIDEO } from '../constantes';
+// import { v4 } from 'uuid';
+
 
 export default class VideoController {
     async fetchAll() {
-
+        return await MongoSingleton.fetchAll<VideoBase>(MONGO_COLLECTION_VIDEO);
     }
 
-    async fetch() {
-
+    async fetch(id: string) {
+        return await MongoSingleton.getById<VideoBase>(MONGO_COLLECTION_VIDEO, id);
     }
 
     upload(options: VideoUploadOption) {
@@ -57,5 +59,9 @@ export default class VideoController {
             });
 
         });
+    }
+
+    streamVideo() {
+
     }
 }

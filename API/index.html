@@ -4,13 +4,20 @@
 <head>
   <meta charset="UTF-8">
   <title>MY APP</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
 </head>
 
 <body>
-  <h1> User Creation Interface </h1>
+  <h1> Youtube </h1>
+  <h3>Participants :</h3>
+  <ul>
+    <li>Louis Charavner</li>
+    <li>Thibauld Mouchon</li>
+    <li>Clément Valette</li>
+  </ul>
+  <h3>Créer un utilisateur : </h3>
   <form action="/user" method="POST">
-    <input type="text" placeholder="nom" name="nom">
-    <input type="text" placeholder="prénom" name="prénom">
+    <input type="text" placeholder="Nom d'utilisateur" name="name">
     <button type="submit">Submit</button>
   </form>
 
@@ -21,6 +28,37 @@
     <br />
     <button type="submit">Upload</button>
   </form>
+  <div class="video-list">
+
+  </div>
+
+  <!-- Pour demander et afficher la liste des vidéos au serveur. -->
+  <script type="text/javascript">
+    const rootVideoList = document.querySelector(".video-list");
+
+    fetch("/api/video/fetchAll")
+      .then((response) => {
+        if (!response.ok) {
+          return response.text().then((txt) => {
+            rootVideoList.innerHTML = txt;
+          })
+        }
+
+        return response.json().then((videoList) => {
+          rootVideoList.innerHTML = videoList.reduce((accumulator, currentVideo) => accumulator + `<div class="video-element">
+                <h3>${currentVideo.name}</h3>
+                <small>Posté par : ${currentVideo.owner}</small>
+                <small>Vues : ${currentVideo.views}</small>
+                <a href="/play?id=${currentVideo._id}">
+                  <button>Voir</button>  
+                </a>
+              </div>`
+          , "");
+        });
+      })
+
+
+  </script>
 </body>
 
 </html>

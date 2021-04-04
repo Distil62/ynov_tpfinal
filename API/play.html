@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <title>MY APP</title>
+</head>
+
+<body>
+    <loader>Loading...</loader>
+    <div id="content" hidden>
+        <h1 id="video-title"></h1>
+        <div id="video-container">
+            Video container
+        </div>
+        <p>Posté par : <span id="owner"></span></p>
+        <p>Vues : <span id="views"></span></p>
+    </div>
+
+    <script type="text/javascript">
+        const loaderElement = document.querySelector("loader");
+        const contentElement = document.querySelector("#content");
+
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const videoId = urlParams.get('id');
+
+        fetch("/api/video/fetch?id=" + videoId)
+            .then((response) => {
+                if (!response.ok) {
+                    return response.text().then((txt) => {
+                        rootVideoList.innerHTML = txt;
+                    })
+                }
+
+                return response.json()
+                    .then((video) => {
+                        contentElement.hidden = false;
+                        loaderElement.hidden = true;
+
+                        const titleElement = document.querySelector("#video-title");
+                        titleElement.textContent = video.name;
+
+                        const ownerElement = document.querySelector("#owner");
+                        ownerElement.textContent = video.owner;
+
+                        const viewsElement = document.querySelector("#views");
+                        viewsElement.textContent = video.views;
+                    });
+            })
+    </script>
+</body>
+
+</html>
