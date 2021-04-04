@@ -1,6 +1,7 @@
-import { readFile } from 'fs';
+import { readFile, unlinkSync } from 'fs';
 import { VideoUploadOption } from '../types/Video';
 import KafkaSingleton from './KafkaSingleton';
+import { VIDEO_TOPIC_NAME } from '../constantes';
 
 export default class VideoController {
     async fetchAll() {
@@ -18,22 +19,32 @@ export default class VideoController {
                     return reject(err);
                 }
 
-                const fileContent = new Uint8Array(data);
+                const fileContent = data;
 
                 // couper le contenu en plusieurs petit morceaux. Défini la taille d'un chunck.
                 // CF : https://gitlab.com/dimimpov/streaming-video-apache-kafka/-/blob/master/kafka/producer.js
                 // ligne 30
-                await KafkaSingleton.publish({
-                    data: fileContent,
-                    topic: "video",
-                    parition: options.tempName
-                });
+
+                const mimeType = options.originalName.split(".")[1];
+
+                let index = 0;
+                for (let i = 0, j = data.length; i < j; i += KafkaSingleton.chunkSize) {
+                    const dataPart = fileContent.slice(i, i + KafkaSingleton.chunkSize);
+                    await KafkaSingleton.publish({
+                        data: dataPart,
+                        topic: VIDEO_TOPIC_NAME,
+                        partition: index,
+                        key: options.tempName + "." + mimeType
+                    });
+                    index++;
+                }
 
                 // Créer l'entrée dans Mongo
 
                 // Supprimer le fichier temporaire dans l'API.
 
-                resolve(true);
+                unlinkSync(options.filePath);
+                return resolve(true);
             });
 
         });

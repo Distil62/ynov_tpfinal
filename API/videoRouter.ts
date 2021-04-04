@@ -21,10 +21,12 @@ export default function videoRouter() {
             await videoController.upload({
                 filePath: request.file.path,
                 originalName: request.file.originalname,
-                tempName: request.file.filename
+                tempName: request.file.filename,
             });
 
-            return response.status(200).send("ok");
+            console.log(request.file.originalname + " send !");
+
+            return response.redirect("/");
         } catch (e) {
             return response.status(500).send(e.message);
         }

@@ -1,4 +1,4 @@
-import express, { json, Response, Request} from 'express';
+import express, { json, Response} from 'express';
 import router from './router';
 
 function main() {
@@ -8,12 +8,12 @@ function main() {
     app.use("/api", router());
     app.use(json());
 
-    app.get('/', (request: Request, response: Response) => {
+    app.get('/', (_, response: Response) => {
         response.sendFile(__dirname + '/index.html')
     });
 
     app.listen(port, () => {
-        console.log("The server is lisent on http://localhost:" + port);
+        console.log("The server is listen on http://localhost:" + port);
     });
 
     return 0;
