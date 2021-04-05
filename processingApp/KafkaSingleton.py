@@ -23,8 +23,8 @@ class KafkaSingleton(metaclass=Singleton):
 
         return self.topics_consume[topic]
 
-    def publish(self, topic: str, data: bytes):
-        if topic not in self.topics_produce.keys:
-            self.topics_produce[topic] = KafkaProducer(bootstrap_servers=bootstrap_server)
+    def publish(self, topic: str, data: bytes, key: str = None, message_number: int = None):
+        if topic not in self.topics_produce.keys():
+            self.topics_produce[topic] = KafkaProducer(bootstrap_servers=self.bootstrap_server)
         
-        self.topics_produce[topic].send(topic, data)
+        return self.topics_produce[topic].send(topic, data, key=bytes(key, encoding="utf-8"), partition=0)

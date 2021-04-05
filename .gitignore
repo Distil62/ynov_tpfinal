@@ -1,3 +1,5 @@
 .venv
 node_modules
 upload/
+__pycache__
+.hadoop-volumes

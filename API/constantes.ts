@@ -1,5 +1,7 @@
 export const KAFKA_BOOTSTRAP_URL = "localhost:9092";
 export const VIDEO_TOPIC_NAME = "video"
+export const STREAMING_TOPIC_NAME = "streaming";
+export const STREAMING_REQUEST_TOPIC_NAME = "streaming-request";
 export const MONGO_URI = "mongodb+srv://dbuser:dbuser@cluster0.pwegt.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
 export const MONGO_DB = "AdminBddProject"
 export const MONGO_COLLECTION_USER = "User";

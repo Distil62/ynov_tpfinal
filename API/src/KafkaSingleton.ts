@@ -27,16 +27,16 @@ class KafkaSingleton {
             this.consummers[options.topic] = new Consumer(this.client, [
                 {
                     topic: options.topic,
-                    partition: 0
                 }
             ],
                 {
-                    autoCommit: false,
-                    groupId: options.groupId
+                    groupId: options.groupId,
+                    encoding: "buffer"
                 });
         }
 
-        this.consummers[options.topic].addListener("message", callback);
+        (this.consummers[options.topic] as Consumer).addListener("message", callback);
+
     }
 
     public publish(options: KafkaPublishOption) {

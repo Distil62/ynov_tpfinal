@@ -1,8 +1,8 @@
-import { readFile, unlinkSync } from 'fs';
-import { VideoBase, VideoBaseInsertResult, VideoUploadOption } from '../types/Video';
+import { readFile, unlinkSync, createWriteStream, createReadStream, ReadStream } from 'fs';
+import { VideoBase, VideoBaseInsertResult, VideoStreamingOption, VideoUploadOption } from '../types/Video';
 import KafkaSingleton from './KafkaSingleton';
 import MongoSingleton from './MongoSingleton';
-import { VIDEO_TOPIC_NAME, MONGO_COLLECTION_VIDEO } from '../constantes';
+import { VIDEO_TOPIC_NAME, MONGO_COLLECTION_VIDEO, STREAMING_TOPIC_NAME, STREAMING_REQUEST_TOPIC_NAME } from '../constantes';
 // import { v4 } from 'uuid';
 
 
@@ -26,17 +26,14 @@ export default class VideoController {
                     const fileContent = data;
                     const mimeType = options.originalName.split(".")[1];
 
-                    // Envoyer les données dans KAFKA
-                    let index = 0;
-                    for (let i = 0, j = data.length; i < j; i += KafkaSingleton.chunkSize) {
+                    for (let i = 0, j = data.length; i <= j; i += KafkaSingleton.chunkSize) {
                         const dataPart = fileContent.slice(i, i + KafkaSingleton.chunkSize);
                         await KafkaSingleton.publish({
                             data: dataPart,
                             topic: VIDEO_TOPIC_NAME,
-                            partition: index % 2 == 0 ? 0 : 1,
+                            partition: 0,
                             key: options.tempName + "." + mimeType
                         });
-                        index++;
                     }
 
 
@@ -61,7 +58,53 @@ export default class VideoController {
         });
     }
 
-    streamVideo() {
+    streamVideo(options: VideoStreamingOption) {
+        return new Promise<ReadStream>((resolve, reject) => {
+            let messageCount = 0;
+            let writeStream = createWriteStream("tmp/" + options.hdfsFileName, {
+                encoding: "binary"
+            });
+            KafkaSingleton.listen({topic: STREAMING_TOPIC_NAME}, (message) => {
+                const keyAndMessageNumber = (message.key as Buffer).toString("utf8");
+                const parsedKey = keyAndMessageNumber.split("-");
+                const key = parsedKey[0];
+                const messageNumbers = parseInt(parsedKey[1]);
 
+                console.log('message key ==>', key);
+                
+                if (key === options.hdfsFileName) {
+                    messageCount++;
+                    console.log('messageCount ==>', messageCount);
+                    console.log('messageNumbers ==>', messageNumbers);
+                    try {
+                        writeStream.write(message.value);
+                        resolve(createReadStream("tmp/" + options.hdfsFileName, {encoding: 'binary'}));
+                        console.log("...")
+                        if (messageCount === messageNumbers) {
+                            console.log("Write of : " + options.hdfsFileName + " is end");
+                            return writeStream.end();
+                        }
+                    } catch (e){
+                        console.log("ERROR ECRITURE");
+                        console.log(e)
+                    }
+
+
+                }
+            });
+    
+            KafkaSingleton.publish({
+                data: 0,
+                topic: STREAMING_REQUEST_TOPIC_NAME,
+                key: options.hdfsFileName,
+                partition: 0
+            });
+
+            // setTimeout(() => {
+            //     return reject(new Error("Time out"));
+            // }, 5 * 1000)
+
+        });
+        
     }
 }

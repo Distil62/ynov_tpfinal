@@ -15,3 +15,7 @@ export interface VideoUploadOption {
     originalName: string;
     owner: string;
 }
+
+export interface VideoStreamingOption {
+    hdfsFileName: string;
+}
