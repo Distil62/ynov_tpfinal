@@ -1,6 +1,9 @@
 # ynov_tpfinal
 Semi Distribued architecture for fake video upload 
 
+DEMO VIDEO : https://youtu.be/I6k62N1hCO4
+
+
 Participants :
 - Louis Charavner
 - Thibauld Mouchon
